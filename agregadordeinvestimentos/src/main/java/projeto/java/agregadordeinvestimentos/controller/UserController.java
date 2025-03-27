@@ -4,11 +4,13 @@ package projeto.java.agregadordeinvestimentos.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import projeto.java.agregadordeinvestimentos.dto.CreateUserDto;
+import projeto.java.agregadordeinvestimentos.dto.UpdateUserDto;
 import projeto.java.agregadordeinvestimentos.entity.User;
 import projeto.java.agregadordeinvestimentos.service.UserService;
 
 import java.net.URI;
 import java.security.URIParameter;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/users")
@@ -38,5 +40,21 @@ public class UserController {
     }
 
     @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+       var users = userService.getUsersAll();
+       return ResponseEntity.ok(users);
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteById(@PathVariable("userId") String userId) {
+        userService.deleteUserById(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<Void> updateById(@PathVariable("userId") String userId, @RequestBody UpdateUserDto updateUserDto) {
+        userService.updateUser(userId,updateUserDto);
+        return ResponseEntity.ok().build();
+    }
 
 }
