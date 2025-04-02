@@ -14,14 +14,12 @@ import projeto.java.agregadordeinvestimentos.entity.User;
 import projeto.java.agregadordeinvestimentos.repository.UserRepository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -124,5 +122,84 @@ class UserServiceTest {
             assertEquals(userId, LongArgumentCaptor.getValue());
         }
 
+    }
+    
+    @Nested
+    class getUsersAll {
+
+        @Test
+        @DisplayName("Should return all users with success")
+        void shouldReturnAllUsersWithSuccess() {
+
+            //Arrange
+            var user = new User(12L,
+                    "username",
+                    "123",
+                    "teste@teste.com",
+                    Instant.now(),
+                    null
+            );
+
+            var userList = List.of(user);
+            doReturn(List.of(user)).when(userRepository).findAll();
+
+
+            //Act
+            var output = userService.getUsersAll();
+            //Assert
+            assertNotNull(output);
+            assertEquals(userList.size(), output.size());
+        }
+    }
+
+    @Nested
+    class deleteUserById  {
+
+        @Test
+        void shouldDeleteUserWithSuccess() {
+
+
+            doReturn(true).when(userRepository).existsById(LongArgumentCaptor.capture());
+
+            doNothing().when(userRepository).deleteById(LongArgumentCaptor.capture());
+
+            var userId = 12L;
+            //Act
+            userService.deleteUserById(Long.valueOf(userId).toString());
+            //Assert
+            var idList = LongArgumentCaptor.getAllValues();
+            assertEquals(userId, idList.get(0));
+            assertEquals(userId, idList.get(1));
+
+            verify(userRepository, times(1)).existsById(idList.get(0));
+            verify(userRepository, times(1)).deleteById(idList.get(1));
+
+        }
+
+        @Test
+        void shouldDeleteUserWhenUserDoesNotExist() {
+
+
+            doReturn(false).when(userRepository).existsById(LongArgumentCaptor.capture());
+            var userId = 12L;
+            //Act
+            userService.deleteUserById(Long.valueOf(userId).toString());
+            //Assert
+
+            assertEquals(userId, LongArgumentCaptor.getValue());
+
+            verify(userRepository, times(1)).existsById(LongArgumentCaptor.getValue());
+
+            verify(userRepository, times(0)).deleteById(any());
+
+        }
+    }
+    
+    @Nested
+    class updateUser {
+
+        @Test
+        void name() {
+        }
     }
 }
